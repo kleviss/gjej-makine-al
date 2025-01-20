@@ -1,10 +1,13 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { Link } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { useAuth } from '@/context/auth';
 
 export default function DashboardScreen() {
+  const { signOut } = useAuth();
+
   return (
     <ThemedView style={styles.container}>
 
@@ -12,7 +15,6 @@ export default function DashboardScreen() {
         <Link href="/profile" style={styles.link}>
           <ThemedText style={styles.linkText}>👤 Profile Settings</ThemedText>
         </Link>
-
         <Link href="/my-listings" style={styles.link}>
           <ThemedText style={styles.linkText}>📋 My Listings</ThemedText>
         </Link>
@@ -23,12 +25,12 @@ export default function DashboardScreen() {
 
         <Link href="/help" style={styles.link}>
           <ThemedText style={styles.linkText}>❓ Help Center</ThemedText>
-        </Link>
+        </Link>yarn add @react-native-picker/picker@2.9.0
 
         {/* logout */}
-        <Link href="/logout" style={styles.link}>
+        <TouchableOpacity onPress={signOut}>
           <ThemedText style={styles.linkText}>🚪 Logout</ThemedText>
-        </Link>
+        </TouchableOpacity>
       </View>
     </ThemedView>
   );

@@ -1,49 +1,113 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { Session, User } from "@supabase/supabase-js";
+import { SplashScreen, useRouter, useSegments } from "expo-router";
+import { createContext, useContext, useEffect, useState } from "react";
 
-import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/config/supabase';
 
+SplashScreen.preventAutoHideAsync();
+
 type AuthContextType = {
+  user: User | null;
   session: Session | null;
   initialized: boolean;
+  signUp: (email: string, password: string) => Promise<void>;
+  signInWithPassword: (email: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
+};
+
+type AuthProviderProps = {
+  children: React.ReactNode;
 };
 
 const AuthContext = createContext<AuthContextType>({
+  user: null,
   session: null,
   initialized: false,
+  signUp: async () => { },
+  signInWithPassword: async () => { },
+  signOut: async () => { },
 });
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export const useAuth = () => useContext(AuthContext);
+
+export function AuthProvider({ children }: AuthProviderProps) {
+  const router = useRouter();
+  const segments = useSegments();
+  const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [initialized, setInitialized] = useState(false);
+  const [initialized, setInitialized] = useState<boolean>(false);
+
+  const signUp = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+    if (error) {
+      throw error;
+    }
+  };
+
+  const signInWithPassword = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) {
+      throw error;
+    }
+  };
+
+  const signOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      throw error;
+    }
+  };
 
   useEffect(() => {
-    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      setUser(session?.user ?? null);
       setInitialized(true);
     });
 
-    // debugger;
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      setUser(session?.user ?? null);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (!initialized) return;
+
+    const inProtectedGroup = segments[0] === "(protected)";
+
+    if (session && !inProtectedGroup) {
+      router.replace("/(protected)/(tabs)");
+    } else if (!session) {
+      // normally we would redirect to the welcome screen
+      router.replace("/(auth)/sign-in");
+    }
+
+    setTimeout(() => {
+      SplashScreen.hideAsync();
+    }, 500);
+  }, [initialized, session]);
+
   return (
-    <AuthContext.Provider value={{ session, initialized }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        session,
+        initialized,
+        signUp,
+        signInWithPassword,
+        signOut,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 }
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-}; 
