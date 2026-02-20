@@ -4,6 +4,7 @@ import 'react-native-gesture-handler';
 import * as Network from 'expo-network'
 import * as SplashScreen from 'expo-splash-screen';
 
+import { Platform, View } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { AuthProvider } from '../context/auth';
@@ -25,12 +26,14 @@ import { useReactQueryDevTools } from '@dev-plugins/react-query';
 const queryClient = new QueryClient()
 
 // React Query Online Manager - Checks if the device is online to refetch queries
-onlineManager.setEventListener((setOnline) => {
-  const subscription = Network.addNetworkStateListener((state) => {
-    setOnline(state.isConnected || false)
+if (typeof window !== 'undefined') {
+  onlineManager.setEventListener((setOnline) => {
+    const subscription = Network.addNetworkStateListener((state) => {
+      setOnline(state.isConnected || false)
+    })
+    return () => subscription.remove()
   })
-  return () => subscription.remove()
-})
+}
 
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -55,20 +58,17 @@ export default function RootLayout() {
   const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
 
 
-  return (
+  const isWeb = Platform.OS === 'web';
+
+  const content = (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <GestureHandlerRootView style={{ flex: 1 }}>
           <ThemeProvider theme={theme}>
             <BottomSheetModalProvider>
               <Stack screenOptions={{ headerShown: false }}>
-                {/* Public routes (non-authenticated) */}
                 <Stack.Screen name="(public)" options={{ headerShown: false }} />
-
-                {/* Auth routes */}
                 <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-
-                {/* Protected routes */}
                 <Stack.Screen name="(protected)" options={{ headerShown: false }} />
               </Stack>
               <StatusBar style="auto" />
@@ -77,5 +77,15 @@ export default function RootLayout() {
         </GestureHandlerRootView>
       </AuthProvider>
     </QueryClientProvider>
+  );
+
+  if (!isWeb) return content;
+
+  return (
+    <View style={{ flex: 1, backgroundColor: '#1a1a2e', alignItems: 'center' }}>
+      <View style={{ flex: 1, width: '100%', maxWidth: 430, backgroundColor: theme.colors.background, overflow: 'hidden', boxShadow: '0 0 40px rgba(0,0,0,0.3)' as any }}>
+        {content}
+      </View>
+    </View>
   );
 }

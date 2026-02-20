@@ -3,10 +3,10 @@ import { Stack } from 'expo-router';
 import { useAuth } from '../../context/auth';
 
 export default function ProtectedLayout() {
-  const { session } = useAuth();
+  const { session, demoMode } = useAuth();
 
-  // Redirect to sign in if not authenticated
-  if (!session) {
+  // Redirect to sign in if not authenticated and not in demo mode
+  if (!session && !demoMode) {
     return <Redirect href="/(public)" />;
   }
 

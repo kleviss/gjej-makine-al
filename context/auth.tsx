@@ -6,26 +6,30 @@ import { supabase } from '@/config/supabase';
 type AuthContextType = {
   session: Session | null;
   initialized: boolean;
+  demoMode: boolean;
+  enterDemoMode: () => void;
+  exitDemoMode: () => void;
 };
 
 const AuthContext = createContext<AuthContextType>({
   session: null,
   initialized: false,
+  demoMode: false,
+  enterDemoMode: () => {},
+  exitDemoMode: () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [initialized, setInitialized] = useState(false);
+  const [demoMode, setDemoMode] = useState(false);
 
   useEffect(() => {
-    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setInitialized(true);
     });
 
-    // debugger;
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
@@ -33,8 +37,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
+  const enterDemoMode = () => setDemoMode(true);
+  const exitDemoMode = () => setDemoMode(false);
+
   return (
-    <AuthContext.Provider value={{ session, initialized }}>
+    <AuthContext.Provider value={{ session, initialized, demoMode, enterDemoMode, exitDemoMode }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,8 +1,9 @@
 import type { CustomTheme } from '@/constants/theme';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 import { View } from 'react-native';
 import styled from '@emotion/native';
 import { supabase } from '@/config/supabase';
+import { useAuth } from '@/context/auth';
 import { useState } from 'react';
 import { useTheme } from '@emotion/react';
 
@@ -50,6 +51,20 @@ const StyledLink = styled(Link)`
   color: ${({ theme }) => theme.colors.primary};
 `;
 
+const DemoButton = styled.TouchableOpacity`
+  margin-top: 30px;
+  padding: 15px;
+  border-radius: 5px;
+  border-width: 2px;
+  border-color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
+const DemoButtonText = styled.Text`
+  text-align: center;
+  font-weight: bold;
+  color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
 export default function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -57,6 +72,7 @@ export default function SignIn() {
   const [error, setError] = useState<string | null>(null);
   const theme = useTheme() as CustomTheme;
   const logoImage = require('../../assets/images/logo.png');
+  const { enterDemoMode } = useAuth();
 
   async function signIn() {
 
@@ -115,6 +131,10 @@ export default function SignIn() {
       <StyledLink href="/(public)" style={{ marginTop: 10 }}>
         {"⏮️ Go Back"}
       </StyledLink>
+
+      <DemoButton onPress={() => { enterDemoMode(); router.replace('/(protected)/(tabs)'); }}>
+        <DemoButtonText>Try Demo Mode</DemoButtonText>
+      </DemoButton>
     </StyledContainer >
   );
 }
