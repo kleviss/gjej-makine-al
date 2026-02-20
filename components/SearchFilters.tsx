@@ -4,25 +4,8 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import BottomSheet from '@gorhom/bottom-sheet';
 import { Car } from '@/constants/mock-data';
 import { ThemedText } from './ThemedText';
-
-const MAKES = ['BMW', 'Mercedes-Benz', 'Audi', 'Volkswagen', 'Toyota', 'Honda'];
-const PRICE_RANGES = [
-  { label: 'Under €5,000', min: 0, max: 5000 },
-  { label: '€5,000 - €10,000', min: 5000, max: 10000 },
-  { label: '€10,000 - €20,000', min: 10000, max: 20000 },
-  { label: '€20,000 - €30,000', min: 20000, max: 30000 },
-  { label: '€30,000 - €50,000', min: 30000, max: 50000 },
-  { label: 'Over €50,000', min: 50000, max: Infinity },
-];
-const YEARS = Array.from({ length: 21 }, (_, i) => 2024 - i);
-const TRANSMISSIONS = ['Any', 'Automatic', 'Manual'];
-
-interface Filters {
-  make?: string;
-  priceRange?: { min: number; max: number; label: string };
-  year?: number;
-  transmission?: string;
-}
+import { MAKES, PRICE_RANGES, YEARS, TRANSMISSIONS } from '@/constants/filters';
+import type { Filters } from '@/types/filters';
 
 interface SearchFiltersProps {
   isVisible: boolean;

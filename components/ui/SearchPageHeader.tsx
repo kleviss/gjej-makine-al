@@ -1,17 +1,9 @@
 import { ScrollView, View } from 'react-native';
 
-import type { CustomTheme } from '@/constants/theme';
 import { FontAwesome } from '@expo/vector-icons';
 import styled from '@emotion/native';
 import { useTheme } from '@emotion/react';
-
-// Types
-interface Filters {
-  make?: string;
-  priceRange?: { min: number; max: number; label: string };
-  year?: number;
-  transmission?: string;
-}
+import type { Filters } from '@/types/filters';
 
 interface SearchPageHeaderProps {
   activeFilters: Filters;
@@ -101,7 +93,7 @@ export function SearchPageHeader({
   onOpenFilters,
   onRemoveFilter
 }: SearchPageHeaderProps) {
-  const theme = useTheme() as CustomTheme;
+  const theme = useTheme();
 
   const renderFilterChips = () => {
     if (Object.keys(activeFilters).length === 0) return null;

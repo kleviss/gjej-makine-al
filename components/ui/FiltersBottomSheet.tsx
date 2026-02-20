@@ -19,34 +19,34 @@ const SectionTitle = styled.Text(({ theme }) => ({
 const OptionsGrid = styled.View({
   flexDirection: 'row',
   flexWrap: 'wrap',
-  marginHorizontal: -4,
+  marginHorizontal: -6,
   maxHeight: 200,
 });
 
-const OptionButton = styled.Pressable<{ isSelected?: boolean }>(({ theme, isSelected }) => ({
-  backgroundColor: isSelected ? theme.colors.primary : theme.colors.background,
+const OptionButton = styled.Pressable<{ isSelected?: boolean }>(({ isSelected, theme }) => ({
+  backgroundColor: isSelected ? theme.colors.primary : theme.colors.surface,
   paddingHorizontal: 12,
   paddingVertical: 8,
   borderRadius: 8,
-  margin: 4,
+  margin: 6,
   minWidth: 80,
   alignItems: 'center',
   borderWidth: 1,
-  borderColor: isSelected ? theme.colors.primary : theme.colors.textSecondary,
+  borderColor: isSelected ? theme.colors.primary : theme.colors.border,
 }));
 
-const OptionText = styled.Text<{ isSelected?: boolean }>(({ theme, isSelected }) => ({
-  color: isSelected ? theme.colors.textContrast : theme.colors.text,
+const OptionText = styled.Text<{ isSelected?: boolean }>(({ isSelected, theme }) => ({
+  color: isSelected ? '#ffffff' : theme.colors.text,
   fontSize: 14,
 }));
 
-const Footer = styled.View({
+const Footer = styled.View(({ theme }) => ({
   paddingTop: 16,
   borderTopWidth: 1,
-  borderTopColor: '#e5e7eb',
-  // paddingHorizontal: 16,
+  borderTopColor: theme.colors.border,
   paddingBottom: 56,
-});
+  gap: 8,
+}));
 
 
 const ApplyButton = styled.Pressable(({ theme }) => ({
@@ -80,12 +80,23 @@ export interface FiltersBottomSheetProps {
   }[];
   onApply: () => void;
   onClose: () => void;
+  onClear?: () => void;
 }
 
+const ClearButton = styled.Pressable({
+  paddingVertical: 12,
+  borderRadius: 8,
+  alignItems: 'center',
+});
+
+const ClearButtonText = styled.Text(({ theme }) => ({
+  color: theme.colors.textSecondary,
+  fontSize: 14,
+  fontWeight: '600',
+}));
+
 const FiltersBottomSheet = forwardRef<BottomSheetModal, FiltersBottomSheetProps>(
-  ({ sections, onApply, onClose }, ref) => {
-
-
+  ({ sections, onApply, onClose, onClear }, ref) => {
     return (
       <BottomSheetView style={styles.contentContainer}>
         <ScrollView>
@@ -113,6 +124,11 @@ const FiltersBottomSheet = forwardRef<BottomSheetModal, FiltersBottomSheetProps>
           <ApplyButton onPress={onApply}>
             <ApplyButtonText>Apply Filters</ApplyButtonText>
           </ApplyButton>
+          {onClear && (
+            <ClearButton onPress={onClear}>
+              <ClearButtonText>Clear All</ClearButtonText>
+            </ClearButton>
+          )}
         </Footer>
         <View style={{ height: 130 }} />
       </BottomSheetView>

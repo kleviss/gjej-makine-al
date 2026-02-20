@@ -1,19 +1,17 @@
-import { ActivityIndicator, Button, RefreshControl, Text, View } from 'react-native';
-import BottomSheet, { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetFlatList, BottomSheetModal, BottomSheetModalProvider, BottomSheetView } from '@gorhom/bottom-sheet';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, RefreshControl, View } from 'react-native';
+import { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetModal } from '@gorhom/bottom-sheet';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 import { CarCard } from '@/components/CarCard';
-import type { CustomTheme } from '@/constants/theme';
 import FiltersBottomSheet from '@/components/ui/FiltersBottomSheet';
 import { FlashList } from '@shopify/flash-list';
-import { FontAwesome } from '@expo/vector-icons';
-import { MOCK_CARS } from '@/constants/mock-data';
 import { SearchPageHeader } from '@/components/ui/SearchPageHeader';
-import { StyleSheet } from 'react-native';
-import { filterCars } from '@/components/SearchFilters';
 import styled from '@emotion/native';
 import { useTheme } from '@emotion/react';
-import { useVehicles } from '@/services/supabase.api';
+import { useVehicles, type VehicleFilters } from '@/services/supabase.api';
+import { MAKES, PRICE_RANGES, YEARS, TRANSMISSIONS } from '@/constants/filters';
+import { MOCK_VEHICLES } from '@/constants/mock-data';
+import type { Filters } from '@/types/filters';
 
 const StyledContainer = styled.View(({ theme }) => ({
   flex: 1,
@@ -36,40 +34,26 @@ const NoResults = styled.Text(({ theme }) => ({
   fontSize: 16,
 }));
 
-// Constants for filters
-const MAKES = ['Toyota', 'Honda', 'BMW', 'Mercedes', 'Audi', 'Volkswagen', 'Ford', 'Chevrolet'];
-const PRICE_RANGES = [
-  { min: 0, max: 5000, label: 'Under $5,000' },
-  { min: 5000, max: 10000, label: '$5,000 - $10,000' },
-  { min: 10000, max: 20000, label: '$10,000 - $20,000' },
-  { min: 20000, max: 30000, label: '$20,000 - $30,000' },
-  { min: 30000, max: 50000, label: '$30,000 - $50,000' },
-  { min: 50000, max: Infinity, label: 'Over $50,000' }
-];
-const YEARS = Array.from({ length: 30 }, (_, i) => new Date().getFullYear() - i);
-const TRANSMISSIONS = ['Automatic', 'Manual'];
 
-interface Filters {
-  make?: string;
-  priceRange?: { min: number; max: number; label: string };
-  year?: number;
-  transmission?: string;
+function filtersToQuery(f: Filters): VehicleFilters {
+  const q: VehicleFilters = {};
+  if (f.make) q.make = f.make;
+  if (f.priceRange) { q.minPrice = f.priceRange.min; q.maxPrice = f.priceRange.max; }
+  if (f.year) { q.minYear = f.year; q.maxYear = f.year; }
+  if (f.transmission) q.transmission = f.transmission;
+  return q;
 }
 
 const SearchScreen = () => {
-  const theme = useTheme() as CustomTheme;
+  const theme = useTheme();
   const [activeFilters, setActiveFilters] = useState<Filters>({});
-  const [filteredCars, setFilteredCars] = useState(MOCK_CARS);
   const [filters, setFilters] = useState<Filters>({});
 
-  // Data Fetching
-  const { data: vehicles, isLoading, error, refetch } = useVehicles();
+  const queryFilters = useMemo(() => filtersToQuery(activeFilters), [activeFilters]);
+  const { data: vehiclesData, isLoading, refetch } = useVehicles(queryFilters);
+  const vehicles = vehiclesData?.length ? vehiclesData : MOCK_VEHICLES;
 
-  // ref
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-
-  // variables
-  const snapPoints = useMemo(() => ["100%"], []);
 
   const handlePresentModalPress = useCallback(() => {
     bottomSheetModalRef.current?.present();
@@ -103,20 +87,19 @@ const SearchScreen = () => {
 
   const handleApply = () => {
     setActiveFilters(filters);
-    const filtered = filterCars(MOCK_CARS, filters);
-    setFilteredCars(filtered);
-    bottomSheetModalRef.current?.close();
     handleCloseFilters();
   };
 
-
+  const handleClearAll = () => {
+    setFilters({});
+    setActiveFilters({});
+  };
 
   const handleRemoveFilter = (key: keyof Filters) => {
     const newFilters = { ...activeFilters };
     delete newFilters[key];
-    const filtered = filterCars(MOCK_CARS, newFilters);
     setActiveFilters(newFilters);
-    setFilteredCars(filtered);
+    setFilters(newFilters);
   };
 
   const filterSections = useMemo(() => [
@@ -180,7 +163,7 @@ const SearchScreen = () => {
             </View>
           ) : (
             <FlashList
-              data={filteredCars}
+              data={vehicles}
               renderItem={({ item }) => <CarCard key={item.id} {...item} />}
               estimatedItemSize={200}
               refreshing={isLoading}
@@ -202,6 +185,8 @@ const SearchScreen = () => {
         snapPoints={["80%"]}
         backdropComponent={renderBackdrop}
         enablePanDownToClose
+        backgroundStyle={{ backgroundColor: theme.colors.surface }}
+        handleIndicatorStyle={{ backgroundColor: theme.colors.textSecondary }}
       >
         <FiltersBottomSheet
           sections={filterSections}
@@ -210,27 +195,11 @@ const SearchScreen = () => {
             handleCloseFilters();
           }}
           onClose={handleCloseFilters}
+          onClear={handleClearAll}
         />
       </BottomSheetModal>
     </StyledContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  contentContainer: {
-    backgroundColor: "white",
-    // flex: 1,
-    padding: 16,
-    // minHeight: 500,
-  },
-  itemContainer: {
-    padding: 6,
-    margin: 6,
-    backgroundColor: "#eee",
-  },
-});
 
 export default SearchScreen;

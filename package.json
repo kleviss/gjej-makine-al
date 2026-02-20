@@ -35,6 +35,8 @@
     "expo-constants": "~17.0.3",
     "expo-font": "~13.0.1",
     "expo-haptics": "~14.0.0",
+    "expo-image-picker": "^17.0.10",
+    "expo-linear-gradient": "^15.0.8",
     "expo-linking": "~7.0.3",
     "expo-network": "^7.0.5",
     "expo-router": "~4.0.11",

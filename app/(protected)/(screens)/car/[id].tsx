@@ -1,11 +1,12 @@
-import { Image, Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, View } from 'react-native';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import type { CustomTheme } from '@/constants/theme';
 import styled from '@emotion/native';
 import { useTheme } from '@emotion/react';
 import { useState } from 'react';
-import { MOCK_CARS, type Car } from '@/constants/mock-data';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { useAuth } from '@/context/auth';
+import { useVehicle, useSavedCars, useToggleSavedCar, getOrCreateConversation } from '@/services/supabase.api';
+import { MOCK_VEHICLES } from '@/constants/mock-data';
 
 const StyledContainer = styled.View(({ theme }) => ({
   flex: 1,
@@ -76,7 +77,18 @@ const Title = styled.Text(({ theme }) => ({
   marginBottom: 8,
   color: theme.colors.text,
   lineHeight: 32,
+  flex: 1,
 }));
+
+const TitleRow = styled.View({
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: 12,
+});
+
+const SaveButton = styled.Pressable({
+  padding: 8,
+});
 
 const Price = styled.Text(({ theme }) => ({
   fontSize: 28,
@@ -187,19 +199,46 @@ const ContactButtonText = styled.Text({
 });
 
 const trimTitle = (title: string) => {
-  // Get just the make and model, remove the year
   const [make, model] = title.split(' ').slice(0, 2);
   return `${make} ${model}`;
 };
 
 export default function CarDetailsScreen() {
   const { id } = useLocalSearchParams();
-  // Find the car with matching id from MOCK_CARS
-  const car = MOCK_CARS.find((car) => car.id === id);
+  const { data: car, isLoading, error } = useVehicle(id as string);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const theme = useTheme() as CustomTheme;
+  const theme = useTheme();
+  const { session } = useAuth();
+  const userId = session?.user?.id;
+  const { data: savedCars } = useSavedCars(userId);
+  const { mutate: toggleSave } = useToggleSavedCar();
+  const isSaved = savedCars?.some((item) => item.vehicle_id === (id as string)) ?? false;
+  const displayCar = car ?? MOCK_VEHICLES.find(c => c.id === (id as string)) ?? null;
+  const isMock = displayCar?.user_id === 'mock';
 
-  if (!car) {
+  const handleContact = async () => {
+    if (!userId || !displayCar || isMock) return;
+    if (userId === displayCar.user_id) {
+      Alert.alert('', 'You cannot message yourself.');
+      return;
+    }
+    try {
+      const conversationId = await getOrCreateConversation(id as string, userId, displayCar.user_id);
+      router.push(`/(protected)/(screens)/messages/${conversationId}`);
+    } catch {
+      Alert.alert('Error', 'Could not start conversation.');
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <StyledContainer style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </StyledContainer>
+    );
+  }
+
+  if (!isLoading && !displayCar) {
     return (
       <StyledContainer>
         <Title>Car not found</Title>
@@ -211,7 +250,7 @@ export default function CarDetailsScreen() {
     <>
       <Stack.Screen
         options={{
-          title: trimTitle(car.title),
+          title: trimTitle(displayCar.title),
           headerBackTitle: 'Search',
         }}
       />
@@ -222,11 +261,11 @@ export default function CarDetailsScreen() {
         <ScrollView>
           <ImageContainer>
             <MainImage
-              source={{ uri: car.images[selectedImageIndex] }}
+              source={{ uri: displayCar.images[selectedImageIndex] }}
               resizeMode="cover"
             />
             <ThumbnailContainer>
-              {car.images.map((image: string, index: number) => (
+              {displayCar.images.map((image: string, index: number) => (
                 <ThumbnailWrapper
                   key={index}
                   isSelected={selectedImageIndex === index}
@@ -242,55 +281,59 @@ export default function CarDetailsScreen() {
           </ImageContainer>
 
           <Content>
-            <Title>{car.title}</Title>
-            <Price>€{car.price.toLocaleString()}</Price>
+            <TitleRow>
+              <Title>{displayCar.title}</Title>
+              {userId && !isMock && (
+                <SaveButton onPress={() => toggleSave({ userId, vehicleId: id as string })}>
+                  <FontAwesome name={isSaved ? 'heart' : 'heart-o'} size={24} color={isSaved ? '#e74c3c' : theme.colors.textSecondary} />
+                </SaveButton>
+              )}
+            </TitleRow>
+            <Price>{displayCar.price.toLocaleString()}</Price>
 
             <SpecsContainer>
               <SpecItem>
                 <SpecLabel>Year</SpecLabel>
-                <SpecValue>{car.year}</SpecValue>
+                <SpecValue>{displayCar.year}</SpecValue>
               </SpecItem>
               <SpecItem>
                 <SpecLabel>Mileage</SpecLabel>
-                <SpecValue>{car.mileage.toLocaleString()} km</SpecValue>
+                <SpecValue>{displayCar.mileage.toLocaleString()} km</SpecValue>
               </SpecItem>
               <SpecItem>
                 <SpecLabel>Transmission</SpecLabel>
-                <SpecValue>{car.transmission}</SpecValue>
+                <SpecValue>{displayCar.transmission}</SpecValue>
               </SpecItem>
               <SpecItem>
                 <SpecLabel>Fuel Type</SpecLabel>
-                <SpecValue>{car.fuelType}</SpecValue>
+                <SpecValue>{displayCar.fuel_type}</SpecValue>
               </SpecItem>
             </SpecsContainer>
 
             <Section>
               <SectionTitle>Description</SectionTitle>
-              <Description>{car.description}</Description>
+              <Description>{displayCar.description}</Description>
             </Section>
 
             <Section>
               <SectionTitle>Features</SectionTitle>
               <FeaturesList>
-                {car.features.map((feature: string, index: number) => (
+                {displayCar.features.map((feature: string, index: number) => (
                   <FeatureItem key={index}>
-                    <FeatureText>✓ {feature}</FeatureText>
+                    <FeatureText>{feature}</FeatureText>
                   </FeatureItem>
                 ))}
               </FeaturesList>
             </Section>
 
-            <SellerContainer>
-              <SectionTitle>Seller Information</SectionTitle>
-              <SellerName>{car.seller.name}</SellerName>
-              <SellerRating>⭐ {car.seller.rating} rating</SellerRating>
-              <ContactButton>
+            {!isMock && (
+              <ContactButton onPress={handleContact}>
                 <ContactButtonText>Contact Seller</ContactButtonText>
               </ContactButton>
-            </SellerContainer>
+            )}
           </Content>
         </ScrollView>
       </StyledContainer>
     </>
   );
-} 
+}

@@ -1,49 +1,114 @@
-import { Button, StyleSheet, Text, View } from 'react-native';
+import { View } from 'react-native';
+import { Link, router } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import styled from '@emotion/native';
+import { useTheme } from '@emotion/react';
 
-import { Link } from 'expo-router';
+const Container = styled.View({
+  flex: 1,
+});
+
+const ContentArea = styled.View({
+  flex: 1,
+  justifyContent: 'flex-end',
+  paddingHorizontal: 24,
+  paddingBottom: 80,
+});
+
+const IconRow = styled.View({
+  flexDirection: 'row',
+  justifyContent: 'center',
+  gap: 16,
+  marginBottom: 32,
+});
+
+const IconCircle = styled.View(({ theme }) => ({
+  width: 48,
+  height: 48,
+  borderRadius: 24,
+  backgroundColor: 'rgba(255,255,255,0.15)',
+  alignItems: 'center',
+  justifyContent: 'center',
+}));
+
+const Title = styled.Text({
+  fontSize: 36,
+  fontWeight: 'bold',
+  color: '#fff',
+  textAlign: 'center',
+  marginBottom: 8,
+});
+
+const Subtitle = styled.Text({
+  fontSize: 16,
+  color: 'rgba(255,255,255,0.8)',
+  textAlign: 'center',
+  marginBottom: 40,
+});
+
+const PrimaryButton = styled.Pressable({
+  backgroundColor: '#fff',
+  paddingVertical: 16,
+  borderRadius: 12,
+  alignItems: 'center',
+  marginBottom: 12,
+});
+
+const PrimaryButtonText = styled.Text(({ theme }) => ({
+  fontSize: 16,
+  fontWeight: '700',
+  color: theme.colors.primary,
+}));
+
+const SecondaryButton = styled.Pressable({
+  paddingVertical: 14,
+  borderRadius: 12,
+  alignItems: 'center',
+  borderWidth: 1.5,
+  borderColor: 'rgba(255,255,255,0.4)',
+});
+
+const SecondaryButtonText = styled.Text({
+  fontSize: 15,
+  fontWeight: '600',
+  color: '#fff',
+});
 
 export default function HomeScreen() {
-  return (
-    <View style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Welcome to Gjej Makine AL</Text>
-        <Text style={styles.subtitle}>Find your perfect car in Albania</Text>
+  const theme = useTheme();
 
-        <View style={styles.buttonContainer}>
+  return (
+    <Container>
+      <LinearGradient
+        colors={[theme.colors.primary, theme.colors.accent]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ flex: 1 }}
+      >
+        <ContentArea>
+          <IconRow>
+            <IconCircle><FontAwesome name="car" size={20} color="#fff" /></IconCircle>
+            <IconCircle><FontAwesome name="search" size={20} color="#fff" /></IconCircle>
+            <IconCircle><FontAwesome name="heart" size={20} color="#fff" /></IconCircle>
+          </IconRow>
+
+          <Title>Gjej Makine</Title>
+          <Subtitle>Find your perfect car in Albania</Subtitle>
+
           <Link href="/(auth)/sign-in" asChild>
-            <Button title="Get Started" onPress={() => { }} />
+            <PrimaryButton>
+              <PrimaryButtonText>Get Started</PrimaryButtonText>
+            </PrimaryButton>
           </Link>
-        </View>
-      </View>
-    </View>
+
+          <Link href="/(auth)/sign-up" asChild>
+            <SecondaryButton>
+              <SecondaryButtonText>Create Account</SecondaryButtonText>
+            </SecondaryButton>
+          </Link>
+        </ContentArea>
+      </LinearGradient>
+    </Container>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 30,
-    color: '#666',
-  },
-  buttonContainer: {
-    width: '100%',
-    paddingHorizontal: 50,
-  },
-}); 

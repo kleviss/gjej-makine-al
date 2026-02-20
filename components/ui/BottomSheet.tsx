@@ -1,7 +1,6 @@
 import BottomSheetBase, { BottomSheetProps as BaseBottomSheetProps, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 import { forwardRef, useCallback, useMemo } from 'react';
 
-import type { CustomTheme } from '@/constants/theme';
 import styled from '@emotion/native';
 import { useTheme } from '@emotion/react';
 
@@ -48,7 +47,7 @@ interface BottomSheetProps extends Partial<BaseBottomSheetProps> {
 
 export const BottomSheet = forwardRef<BottomSheetBase, BottomSheetProps>(
   ({ title, onClose, children, snapPoints: customSnapPoints, isFullScreen, index = -1, onChange, ...props }, ref) => {
-    const theme = useTheme() as CustomTheme;
+    const theme = useTheme();
 
     const snapPoints = useMemo(() =>
       customSnapPoints || (isFullScreen ? ["100%"] : ["25%", "50%", "75%"]),

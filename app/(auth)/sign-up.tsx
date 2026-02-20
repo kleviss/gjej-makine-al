@@ -1,4 +1,3 @@
-import type { CustomTheme } from '@/constants/theme';
 import { Link } from 'expo-router';
 import { View } from 'react-native';
 import styled from '@emotion/native';
@@ -58,7 +57,7 @@ export default function SignUp() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const theme = useTheme() as CustomTheme;
+  const theme = useTheme();
   const logoImage = require('../../assets/images/logo.png');
 
   async function signUp() {

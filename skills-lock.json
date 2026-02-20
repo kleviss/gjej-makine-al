@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "expo-liquid-glass": {
+      "source": "devanshudesai/agent-skills",
+      "sourceType": "github",
+      "computedHash": "54e019fbdcf965286d9eda859cc30376d53e0ea22d9b41384044e9a787599265"
+    }
+  }
+}

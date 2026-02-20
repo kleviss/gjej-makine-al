@@ -1,4 +1,3 @@
-import type { CustomTheme } from '@/constants/theme';
 import { Link, router } from 'expo-router';
 import { View } from 'react-native';
 import styled from '@emotion/native';
@@ -7,7 +6,7 @@ import { useAuth } from '@/context/auth';
 import { useState } from 'react';
 import { useTheme } from '@emotion/react';
 
-const StyledContainer = styled.View(({ theme }: { theme: CustomTheme }) => ({
+const StyledContainer = styled.View(({ theme }) => ({
   flex: 1,
   padding: 20,
   justifyContent: 'center',
@@ -70,7 +69,7 @@ export default function SignIn() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const theme = useTheme() as CustomTheme;
+  const theme = useTheme();
   const logoImage = require('../../assets/images/logo.png');
   const { enterDemoMode } = useAuth();
 

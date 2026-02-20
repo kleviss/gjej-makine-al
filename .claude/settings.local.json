@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(gsd:new-project)",
+      "Skill(gsd:map-codebase)",
+      "Bash(npx skills add https://github.com/devanshudesai/agent-skills --skill expo-liquid-glass)",
+      "Bash(npx skills add:*)",
+      "Bash(npx expo install:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)"
+    ]
+  }
+}

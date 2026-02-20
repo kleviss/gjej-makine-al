@@ -1,59 +1,83 @@
-import type { CustomTheme } from '@/constants/theme';
-import { Image } from 'react-native';
+import { View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 import styled from '@emotion/native';
+import { useAuth } from '@/context/auth';
+import { useSavedCars, useToggleSavedCar } from '@/services/supabase.api';
 
 const Card = styled.Pressable(({ theme }) => ({
-  backgroundColor: theme.colors.background,
-  borderRadius: 12,
+  backgroundColor: theme.colors.surface,
+  borderRadius: 14,
   overflow: 'hidden',
-  shadowColor: '#000',
-  shadowOffset: {
-    width: 0,
-    height: 2,
-  },
-  shadowOpacity: 0.1,
-  shadowRadius: 3,
-  elevation: 3,
   marginBottom: 16,
-  borderWidth: 1,
-  borderColor: theme.colors.textSecondary,
+  ...theme.shadows.card,
 }));
+
+const ImageWrapper = styled.View({
+  position: 'relative',
+});
 
 const CardImage = styled.Image({
   width: '100%',
   height: 200,
 });
 
+const HeartButton = styled.Pressable({
+  position: 'absolute',
+  top: 10,
+  right: 10,
+  backgroundColor: 'rgba(0,0,0,0.4)',
+  borderRadius: 20,
+  width: 36,
+  height: 36,
+  alignItems: 'center',
+  justifyContent: 'center',
+  zIndex: 10,
+});
+
+const PriceBadge = styled.View(({ theme }) => ({
+  position: 'absolute',
+  bottom: 10,
+  left: 10,
+  backgroundColor: theme.colors.primary,
+  paddingHorizontal: 12,
+  paddingVertical: 6,
+  borderRadius: 8,
+}));
+
+const PriceText = styled.Text({
+  color: '#fff',
+  fontSize: 16,
+  fontWeight: 'bold',
+});
+
 const Content = styled.View({
-  padding: 16,
+  padding: 12,
 });
 
 const Title = styled.Text(({ theme }) => ({
-  fontSize: 18,
+  fontSize: 16,
   fontWeight: '600',
-  marginBottom: 8,
   color: theme.colors.text,
-  lineHeight: 26,
+  marginBottom: 8,
 }));
 
-const Price = styled.Text(({ theme }) => ({
-  fontSize: 20,
-  fontWeight: 'bold',
-  color: theme.colors.primary,
-  marginBottom: 12,
-  lineHeight: 46,
-}));
-
-const Details = styled.View({
+const ChipsRow = styled.View({
   flexDirection: 'row',
-  justifyContent: 'space-between',
   flexWrap: 'wrap',
-  gap: 8,
+  gap: 6,
 });
 
-const DetailText = styled.Text(({ theme }) => ({
-  fontSize: 14,
+const Chip = styled.View(({ theme }) => ({
+  backgroundColor: theme.colors.background,
+  paddingHorizontal: 8,
+  paddingVertical: 4,
+  borderRadius: 6,
+}));
+
+const ChipText = styled.Text(({ theme }) => ({
+  fontSize: 12,
   color: theme.colors.textSecondary,
 }));
 
@@ -64,28 +88,50 @@ interface CarCardProps {
   year: number;
   mileage: number;
   location: string;
-  imageUrl: string;
+  imageUrl?: string;
+  images?: string[];
 }
 
-export function CarCard({ id, title, price, year, mileage, location, imageUrl }: CarCardProps) {
+export function CarCard({ id, title, price, year, mileage, location, imageUrl, images }: CarCardProps) {
+  const imageSource = imageUrl || images?.[0];
+  const { session } = useAuth();
+  const userId = session?.user?.id;
+  const { data: savedCars } = useSavedCars(userId);
+  const { mutate: toggleSave } = useToggleSavedCar();
+  const isSaved = savedCars?.some((item) => item.vehicle_id === id) ?? false;
+
   return (
     <Link href={`/car/${id}`} asChild>
       <Card>
-        <CardImage
-          source={{ uri: imageUrl }}
-          resizeMode="cover"
-        />
+        <ImageWrapper>
+          <CardImage source={{ uri: imageSource }} resizeMode="cover" />
+          <LinearGradient
+            colors={['transparent', 'rgba(0,0,0,0.5)']}
+            style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 80 }}
+          />
+          {userId && (
+            <HeartButton
+              onPress={(e) => {
+                e.preventDefault();
+                toggleSave({ userId, vehicleId: id });
+              }}
+            >
+              <FontAwesome name={isSaved ? 'heart' : 'heart-o'} size={18} color={isSaved ? '#e74c3c' : 'white'} />
+            </HeartButton>
+          )}
+          <PriceBadge>
+            <PriceText>€{price.toLocaleString()}</PriceText>
+          </PriceBadge>
+        </ImageWrapper>
         <Content>
-          <Title>{title}</Title>
-          <Price>€{price.toLocaleString()}</Price>
-
-          <Details>
-            <DetailText>📅 {year}</DetailText>
-            <DetailText>🛣️ {mileage.toLocaleString()} km</DetailText>
-            <DetailText>📍 {location}</DetailText>
-          </Details>
+          <Title numberOfLines={1}>{title}</Title>
+          <ChipsRow>
+            <Chip><ChipText>{year}</ChipText></Chip>
+            <Chip><ChipText>{mileage.toLocaleString()} km</ChipText></Chip>
+            <Chip><ChipText>{location}</ChipText></Chip>
+          </ChipsRow>
         </Content>
       </Card>
     </Link>
   );
-} 
+}

@@ -1,8 +1,7 @@
 import { Link, Tabs } from 'expo-router';
-
-import type { CustomTheme } from '@/constants/theme';
+import { BlurView } from 'expo-blur';
+import { StyleSheet } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Pressable } from 'react-native';
 import { useTheme } from '@emotion/react';
 
 function TabBarIcon(props: {
@@ -13,7 +12,8 @@ function TabBarIcon(props: {
 }
 
 export default function TabLayout() {
-  const theme = useTheme() as CustomTheme;
+  const theme = useTheme();
+  const isDark = theme.dark;
 
   return (
     <Tabs
@@ -21,8 +21,18 @@ export default function TabLayout() {
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.textSecondary,
         tabBarStyle: {
-          backgroundColor: theme.colors.background,
+          position: 'absolute',
+          backgroundColor: isDark ? 'rgba(15,17,21,0.75)' : 'rgba(255,255,255,0.8)',
+          borderTopColor: 'transparent',
+          elevation: 0,
         },
+        tabBarBackground: () => (
+          <BlurView
+            intensity={80}
+            tint={isDark ? 'dark' : 'light'}
+            style={StyleSheet.absoluteFill}
+          />
+        ),
         headerStyle: {
           backgroundColor: theme.colors.background,
         },
@@ -32,6 +42,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Home',
+          headerShown: false,
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
         }}
       />

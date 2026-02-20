@@ -6,6 +6,7 @@ export default function ScreensLayout() {
   const NewListingPageOptions = { headerShown: true, headerTitle: 'New Listing' };
   const HelpPageOptions = { headerShown: true, headerTitle: 'Help Center' };
   const MessagesPageOptions = { headerShown: true, headerTitle: 'Messages' };
+  const ChatPageOptions = { headerShown: true, headerTitle: 'Chat' };
   const MyListingsPageOptions = { headerShown: true, headerTitle: 'My Listings' };
   const ProfilePageOptions = { headerShown: true, headerTitle: 'Profile' };
 
@@ -15,6 +16,7 @@ export default function ScreensLayout() {
       <Stack.Screen name="new-listing/index" options={NewListingPageOptions} />
       <Stack.Screen name="help/index" options={HelpPageOptions} />
       <Stack.Screen name="messages/index" options={MessagesPageOptions} />
+      <Stack.Screen name="messages/[id]" options={ChatPageOptions} />
       <Stack.Screen name="my-listings/index" options={MyListingsPageOptions} />
       <Stack.Screen name="profile-settings/index" options={ProfilePageOptions} />
     </Stack>
