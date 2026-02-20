@@ -1,33 +1,32 @@
 "use client";
 
-import { createBrowserSupabase } from "@/lib/supabase";
+import { useAuth } from "@/lib/auth";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
-export default function AuthGuard({ children }: { children: React.ReactNode }) {
-  const [ok, setOk] = useState(false);
+type Props = { children: React.ReactNode; allowedRoles?: string[] };
+
+export default function AuthGuard({ children, allowedRoles }: Props) {
+  const { isLoading, role, isDemo } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
 
   useEffect(() => {
     if (searchParams.get("demo") === "1") {
       localStorage.setItem("admin_demo", "1");
-      setOk(true);
+      window.location.reload();
       return;
     }
-    if (localStorage.getItem("admin_demo") === "1") {
-      setOk(true);
-      return;
-    }
-    const supabase = createBrowserSupabase();
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!session) return router.replace("/login");
-      const { data } = await supabase.from("user_profiles").select("role").single();
-      if (data?.role !== "admin") return router.replace("/login");
-      setOk(true);
-    });
-  }, [router, searchParams]);
+  }, [searchParams]);
 
-  if (!ok) return <div className="flex h-screen items-center justify-center text-gray-400">Loading...</div>;
+  useEffect(() => {
+    if (isLoading) return;
+    if (!role && !isDemo) { router.replace("/login"); return; }
+    if (allowedRoles && role && !allowedRoles.includes(role)) { router.replace("/"); }
+  }, [isLoading, role, isDemo, allowedRoles, router]);
+
+  if (isLoading) return <div className="flex h-screen items-center justify-center text-muted">Loading...</div>;
+  if (!role && !isDemo) return null;
+  if (allowedRoles && role && !allowedRoles.includes(role)) return null;
   return <>{children}</>;
 }
