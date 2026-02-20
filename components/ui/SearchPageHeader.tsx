@@ -47,7 +47,7 @@ const Subtitle = styled.Text(({ theme }) => ({
 const FilterButton = styled.Pressable(({ theme }) => ({
   backgroundColor: theme.colors.background,
   borderWidth: 1,
-  borderColor: theme.colors.textSecondary,
+  borderColor: theme.colors.border,
   paddingHorizontal: 16,
   paddingVertical: 8,
   borderRadius: 8,

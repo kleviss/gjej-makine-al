@@ -37,6 +37,7 @@ export default function TabLayout() {
           backgroundColor: theme.colors.background,
         },
         headerTintColor: theme.colors.text,
+        headerShadowVisible: false,
       }}>
       <Tabs.Screen
         name="index"

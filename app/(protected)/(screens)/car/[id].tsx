@@ -13,22 +13,9 @@ const StyledContainer = styled.View(({ theme }) => ({
   backgroundColor: theme.colors.background,
 }));
 
-const BackButton = styled.Pressable({
-  position: 'absolute',
-  top: 66,
-  left: 16,
-  backgroundColor: 'black',
-  padding: 10,
-  borderRadius: 10,
-  zIndex: 1000,
-});
-
 const ImageContainer = styled.View(({ theme }) => ({
   backgroundColor: theme.colors.background,
-  borderRadius: 12,
   overflow: 'hidden',
-  borderWidth: 1,
-  borderColor: theme.colors.textSecondary,
 }));
 
 const MainImage = styled.Image({
@@ -102,12 +89,10 @@ const SpecsContainer = styled.View(({ theme }) => ({
   flexDirection: 'row',
   flexWrap: 'wrap',
   gap: 16,
-  backgroundColor: theme.colors.background,
+  backgroundColor: theme.colors.surface,
   padding: 16,
   borderRadius: 12,
   marginBottom: 24,
-  borderWidth: 1,
-  borderColor: theme.colors.textSecondary,
 }));
 
 const SpecItem = styled.View({
@@ -151,12 +136,10 @@ const FeaturesList = styled.View({
 });
 
 const FeatureItem = styled.View(({ theme }) => ({
-  backgroundColor: theme.colors.background,
+  backgroundColor: theme.colors.surface,
   paddingVertical: 8,
   paddingHorizontal: 16,
   borderRadius: 20,
-  borderWidth: 1,
-  borderColor: theme.colors.textSecondary,
 }));
 
 const FeatureText = styled.Text(({ theme }) => ({
@@ -197,11 +180,6 @@ const ContactButtonText = styled.Text({
   fontSize: 16,
   fontWeight: '600',
 });
-
-const trimTitle = (title: string) => {
-  const [make, model] = title.split(' ').slice(0, 2);
-  return `${make} ${model}`;
-};
 
 export default function CarDetailsScreen() {
   const { id } = useLocalSearchParams();
@@ -250,14 +228,12 @@ export default function CarDetailsScreen() {
     <>
       <Stack.Screen
         options={{
-          title: trimTitle(displayCar.title),
-          headerBackTitle: 'Search',
+          title: displayCar.title,
+          headerStyle: { backgroundColor: theme.colors.background },
+          headerTintColor: theme.colors.text,
         }}
       />
       <StyledContainer>
-        <BackButton onPress={() => router.back()}>
-          <FontAwesome name="arrow-left" size={14} color="white" />
-        </BackButton>
         <ScrollView>
           <ImageContainer>
             <MainImage
@@ -289,7 +265,7 @@ export default function CarDetailsScreen() {
                 </SaveButton>
               )}
             </TitleRow>
-            <Price>{displayCar.price.toLocaleString()}</Price>
+            <Price>€{displayCar.price.toLocaleString()}</Price>
 
             <SpecsContainer>
               <SpecItem>

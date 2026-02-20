@@ -1,8 +1,9 @@
-import { View } from 'react-native';
+import { Image, Pressable } from 'react-native';
 import { Link } from 'expo-router';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import styled from '@emotion/native';
 import { useAuth } from '@/context/auth';
+import { useTheme } from '@emotion/react';
 import { supabase } from '@/config/supabase';
 
 const Container = styled.ScrollView(({ theme }) => ({
@@ -12,7 +13,7 @@ const Container = styled.ScrollView(({ theme }) => ({
 
 const AvatarSection = styled.View({
   alignItems: 'center',
-  paddingTop: 32,
+  paddingTop: 24,
   paddingBottom: 24,
 });
 
@@ -29,21 +30,27 @@ const Avatar = styled.View(({ theme }) => ({
 const Email = styled.Text(({ theme }) => ({
   fontSize: 14,
   color: theme.colors.textSecondary,
+  marginBottom: 4,
+}));
+
+const BrandLabel = styled.Text(({ theme }) => ({
+  fontSize: 12,
+  color: theme.colors.primary,
+  fontWeight: '600',
 }));
 
 const MenuSection = styled.View({
   paddingHorizontal: 16,
-  gap: 2,
+  gap: 8,
 });
 
-const MenuItem = styled(Link)(({ theme }) => ({
+const MenuItemInner = styled.Pressable(({ theme }) => ({
   flexDirection: 'row',
   alignItems: 'center',
   backgroundColor: theme.colors.surface,
   paddingVertical: 14,
   paddingHorizontal: 16,
   borderRadius: 12,
-  marginBottom: 8,
 }));
 
 const MenuText = styled.Text(({ theme }) => ({
@@ -75,24 +82,28 @@ const menuItems = [
 
 export default function ProfileScreen() {
   const { session } = useAuth();
+  const theme = useTheme();
   const email = session?.user?.email ?? 'Guest';
 
   return (
     <Container contentContainerStyle={{ paddingBottom: 100 }}>
       <AvatarSection>
         <Avatar>
-          <FontAwesome name="user" size={36} color="#9BA1A6" />
+          <FontAwesome name="user" size={36} color={theme.colors.icon} />
         </Avatar>
         <Email>{email}</Email>
+        <BrandLabel>Gjej Makine</BrandLabel>
       </AvatarSection>
 
       <MenuSection>
         {menuItems.map((item) => (
-          <MenuItem key={item.href} href={item.href}>
-            <FontAwesome name={item.icon} size={18} color="#9BA1A6" />
-            <MenuText>{item.label}</MenuText>
-            <FontAwesome name="chevron-right" size={14} color="#9BA1A6" />
-          </MenuItem>
+          <Link key={item.href} href={item.href} asChild>
+            <MenuItemInner>
+              <FontAwesome name={item.icon} size={18} color={theme.colors.icon} />
+              <MenuText>{item.label}</MenuText>
+              <FontAwesome name="chevron-right" size={14} color={theme.colors.icon} />
+            </MenuItemInner>
+          </Link>
         ))}
       </MenuSection>
 

@@ -1,56 +1,84 @@
 import { Link } from 'expo-router';
 import { View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import styled from '@emotion/native';
 import { supabase } from '@/config/supabase';
 import { useState } from 'react';
 import { useTheme } from '@emotion/react';
 
-const StyledContainer = styled.View(({ theme }) => ({
+const Container = styled.View(({ theme }) => ({
   flex: 1,
-  padding: 20,
-  justifyContent: 'center',
   backgroundColor: theme.colors.background,
 }));
 
+const HeaderArea = styled.View({
+  paddingTop: 80,
+  paddingBottom: 40,
+  alignItems: 'center',
+});
 
-const StyledText = styled.Text<{ isHeading?: boolean; variant?: 'error' | 'success' }>(props => ({
-  fontSize: props.isHeading ? 24 : 14,
+const BrandText = styled.Text({
+  fontSize: 28,
   fontWeight: 'bold',
-  marginBottom: props.isHeading ? 20 : 0,
-  textAlign: 'center',
-  color: props.variant === 'error' ? props.theme.colors.textError :
-    props.variant === 'success' ? props.theme.colors.textSuccess :
-      props.isHeading ? props.theme.colors.text : props.theme.colors.textContrast,
+  color: '#fff',
+  marginBottom: 4,
+});
+
+const BrandSub = styled.Text({
+  fontSize: 14,
+  color: 'rgba(255,255,255,0.8)',
+});
+
+const FormArea = styled.View({
+  flex: 1,
+  paddingHorizontal: 24,
+  paddingTop: 32,
+});
+
+const Heading = styled.Text(({ theme }) => ({
+  fontSize: 22,
+  fontWeight: '700',
+  color: theme.colors.text,
+  marginBottom: 24,
 }));
 
-
-const StyledInput = styled.TextInput(({ theme }) => ({
-  borderWidth: 1,
-  borderColor: theme.colors.textSecondary,
-  padding: 15,
-  marginBottom: 15,
-  borderRadius: 5,
+const Input = styled.TextInput(({ theme }) => ({
+  backgroundColor: theme.colors.surface,
+  borderRadius: 12,
+  padding: 16,
+  marginBottom: 14,
+  fontSize: 15,
   color: theme.colors.text,
 }));
 
-const StyledButton = styled.TouchableOpacity<{ disabled?: boolean }>(({ theme, disabled }) => ({
+const PrimaryBtn = styled.TouchableOpacity<{ disabled?: boolean }>(({ theme, disabled }) => ({
   backgroundColor: disabled ? theme.colors.textSecondary : theme.colors.primary,
-  padding: 15,
-  borderRadius: 5,
-  marginBottom: 15,
+  paddingVertical: 16,
+  borderRadius: 12,
+  alignItems: 'center',
+  marginBottom: 16,
   opacity: disabled ? 0.7 : 1,
 }));
 
-const StyledLink = styled(Link)(({ theme }) => ({
+const BtnText = styled.Text({
+  color: '#fff',
+  fontSize: 16,
+  fontWeight: '600',
+});
+
+const LinkText = styled.Text(({ theme }) => ({
   textAlign: 'center',
   color: theme.colors.primary,
+  fontSize: 14,
+  marginBottom: 8,
 }));
 
-const StyledImage = styled.Image`
-  width: 100px;
-  height: 100px;
-  align-self: center;
-`;
+const MsgText = styled.Text<{ variant?: 'error' | 'success' }>(({ theme, variant }) => ({
+  color: variant === 'success' ? theme.colors.textSuccess : theme.colors.textError,
+  textAlign: 'center',
+  fontSize: 14,
+  marginBottom: 14,
+}));
 
 export default function SignUp() {
   const [email, setEmail] = useState('');
@@ -58,75 +86,61 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const theme = useTheme();
-  const logoImage = require('../../assets/images/logo.png');
 
   async function signUp() {
     setLoading(true);
     setError(null);
-
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
-    if (error) {
-      setError(error.message);
-    } else {
-      setError('Please check your email for verification link');
-    }
-
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) setError(error.message);
+    else setError('Please check your email for verification link');
     setLoading(false);
   }
 
   return (
-    <StyledContainer>
-      <StyledImage source={logoImage} />
-      <StyledText isHeading={true}>Create Account</StyledText>
-      {error && (
-        <View style={{ marginBottom: 15 }}>
-          <StyledText
-            theme={theme}
-            variant={error.includes('verification') ? 'success' : 'error'}
-          >
-            {error}
-          </StyledText>
-        </View>
-      )}
-
-      <StyledInput
-        theme={theme}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        placeholderTextColor={theme.colors.textSecondary}
-      />
-
-      <StyledInput
-        theme={theme}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        placeholderTextColor={theme.colors.textSecondary}
-      />
-
-      <StyledButton
-        onPress={signUp}
-        disabled={loading}
+    <Container>
+      <LinearGradient
+        colors={[theme.colors.primary, theme.colors.accent]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
       >
-        <StyledText theme={theme}>
-          {loading ? 'Creating account...' : 'Sign Up'}
-        </StyledText>
-      </StyledButton>
+        <HeaderArea>
+          <BrandText>Gjej Makine</BrandText>
+          <BrandSub>Find your perfect car in Albania</BrandSub>
+        </HeaderArea>
+      </LinearGradient>
 
-      <StyledLink href="/sign-in">
-        Already have an account? Sign In
-      </StyledLink>
-      {/* go back to home screen */}
-      <StyledLink href="/(public)" style={{ marginTop: 10 }}>
-        {"⏮️ Back Home"}
-      </StyledLink>
-    </StyledContainer>
+      <FormArea>
+        <Heading>Create Account</Heading>
+
+        {error && (
+          <MsgText variant={error.includes('verification') ? 'success' : 'error'}>
+            {error}
+          </MsgText>
+        )}
+
+        <Input
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          placeholderTextColor={theme.colors.textSecondary}
+        />
+        <Input
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          placeholderTextColor={theme.colors.textSecondary}
+        />
+
+        <PrimaryBtn onPress={signUp} disabled={loading}>
+          <BtnText>{loading ? 'Creating account...' : 'Sign Up'}</BtnText>
+        </PrimaryBtn>
+
+        <Link href="/sign-in" asChild>
+          <LinkText>Already have an account? Sign In</LinkText>
+        </Link>
+      </FormArea>
+    </Container>
   );
-} 
+}

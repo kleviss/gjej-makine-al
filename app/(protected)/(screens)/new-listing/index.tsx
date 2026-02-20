@@ -23,12 +23,12 @@ const Label = styled.Text(({ theme }) => ({
 
 const Input = styled.TextInput(({ theme }) => ({
   borderWidth: 1,
-  borderColor: theme.colors.textSecondary,
-  borderRadius: 8,
+  borderWidth: 0,
+  borderRadius: 12,
   padding: 12,
   fontSize: 16,
   color: theme.colors.text,
-  backgroundColor: theme.colors.background,
+  backgroundColor: theme.colors.surface,
 }));
 
 const PickerRow = styled.ScrollView({ flexDirection: 'row' });
@@ -38,8 +38,8 @@ const Chip = styled.Pressable<{ selected?: boolean }>(({ theme, selected }) => (
   paddingVertical: 8,
   borderRadius: 20,
   borderWidth: 1,
-  borderColor: selected ? theme.colors.primary : theme.colors.textSecondary,
-  backgroundColor: selected ? theme.colors.primary : 'transparent',
+  borderColor: selected ? theme.colors.primary : theme.colors.border,
+  backgroundColor: selected ? theme.colors.primary : theme.colors.surface,
   marginRight: 8,
 }));
 
@@ -57,7 +57,7 @@ const AddImageBtn = styled.Pressable(({ theme }) => ({
   height: 80,
   borderRadius: 8,
   borderWidth: 1,
-  borderColor: theme.colors.textSecondary,
+  borderColor: theme.colors.border,
   borderStyle: 'dashed',
   alignItems: 'center',
   justifyContent: 'center',

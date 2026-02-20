@@ -1,68 +1,99 @@
 import { Link, router } from 'expo-router';
 import { View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import styled from '@emotion/native';
 import { supabase } from '@/config/supabase';
 import { useAuth } from '@/context/auth';
 import { useState } from 'react';
 import { useTheme } from '@emotion/react';
 
-const StyledContainer = styled.View(({ theme }) => ({
+const Container = styled.View(({ theme }) => ({
   flex: 1,
-  padding: 20,
-  justifyContent: 'center',
   backgroundColor: theme.colors.background,
 }));
 
-const StyledText = styled.Text<{ isHeading?: boolean; variant?: 'error' }>(props => ({
-  fontSize: props.isHeading ? 24 : 14,
+const HeaderArea = styled.View({
+  paddingTop: 80,
+  paddingBottom: 40,
+  alignItems: 'center',
+});
+
+const BrandText = styled.Text({
+  fontSize: 28,
   fontWeight: 'bold',
-  marginBottom: props.isHeading ? 20 : 0,
-  textAlign: 'center',
-  color: props.variant === 'error' ? props.theme.colors.textError : props.isHeading ? props.theme.colors.text : props.theme.colors.textContrast,
+  color: '#fff',
+  marginBottom: 4,
+});
+
+const BrandSub = styled.Text({
+  fontSize: 14,
+  color: 'rgba(255,255,255,0.8)',
+});
+
+const FormArea = styled.View({
+  flex: 1,
+  paddingHorizontal: 24,
+  paddingTop: 32,
+});
+
+const Heading = styled.Text(({ theme }) => ({
+  fontSize: 22,
+  fontWeight: '700',
+  color: theme.colors.text,
+  marginBottom: 24,
 }));
 
-const StyledImage = styled.Image`
-  width: 100px;
-  height: 100px;
-  align-self: center;
-`;
+const Input = styled.TextInput(({ theme }) => ({
+  backgroundColor: theme.colors.surface,
+  borderRadius: 12,
+  padding: 16,
+  marginBottom: 14,
+  fontSize: 15,
+  color: theme.colors.text,
+}));
 
-const StyledInput = styled.TextInput`
-  border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.textSecondary};
-  padding: 15px;
-  margin-bottom: 15px;
-  border-radius: 5px;
-  color: ${({ theme }) => theme.colors.text};
-`;
+const PrimaryBtn = styled.TouchableOpacity<{ disabled?: boolean }>(({ theme, disabled }) => ({
+  backgroundColor: disabled ? theme.colors.textSecondary : theme.colors.primary,
+  paddingVertical: 16,
+  borderRadius: 12,
+  alignItems: 'center',
+  marginBottom: 16,
+  opacity: disabled ? 0.7 : 1,
+}));
 
-const StyledButton = styled.TouchableOpacity<{ disabled?: boolean }>`
-  background-color: ${({ theme, disabled }) =>
-    disabled ? theme.colors.textSecondary : theme.colors.primary};
-  padding: 15px;
-  border-radius: 5px;
-  margin-bottom: 15px;
-  opacity: ${({ disabled }) => (disabled ? 0.7 : 1)};
-`;
+const BtnText = styled.Text({
+  color: '#fff',
+  fontSize: 16,
+  fontWeight: '600',
+});
 
-const StyledLink = styled(Link)`
-  text-align: center;
-  color: ${({ theme }) => theme.colors.primary};
-`;
+const LinkText = styled.Text(({ theme }) => ({
+  textAlign: 'center',
+  color: theme.colors.primary,
+  fontSize: 14,
+  marginBottom: 8,
+}));
 
-const DemoButton = styled.TouchableOpacity`
-  margin-top: 30px;
-  padding: 15px;
-  border-radius: 5px;
-  border-width: 2px;
-  border-color: ${({ theme }) => theme.colors.textSecondary};
-`;
+const ErrorText = styled.Text(({ theme }) => ({
+  color: theme.colors.textError,
+  textAlign: 'center',
+  fontSize: 14,
+  marginBottom: 14,
+}));
 
-const DemoButtonText = styled.Text`
-  text-align: center;
-  font-weight: bold;
-  color: ${({ theme }) => theme.colors.textSecondary};
-`;
+const DemoBtn = styled.TouchableOpacity(({ theme }) => ({
+  backgroundColor: theme.colors.surface,
+  paddingVertical: 14,
+  borderRadius: 12,
+  alignItems: 'center',
+  marginTop: 20,
+}));
+
+const DemoBtnText = styled.Text(({ theme }) => ({
+  color: theme.colors.primary,
+  fontSize: 14,
+  fontWeight: '600',
+}));
 
 export default function SignIn() {
   const [email, setEmail] = useState('');
@@ -70,70 +101,61 @@ export default function SignIn() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const theme = useTheme();
-  const logoImage = require('../../assets/images/logo.png');
   const { enterDemoMode } = useAuth();
 
   async function signIn() {
-
     setLoading(true);
     setError(null);
-
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    console.log('error', error);
-    if (error) {
-      setError(error.message);
-    }
-
+    if (error) setError(error.message);
     setLoading(false);
   }
 
   return (
-    <StyledContainer>
-      <StyledImage source={logoImage} />
-      <StyledText isHeading={true}>Sign In</StyledText>
-
-      {error && (
-        <View style={{ marginBottom: 15 }}>
-          <StyledText variant="error">{error}</StyledText>
-        </View>
-      )}
-
-      <StyledInput
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        placeholderTextColor={theme.colors.textSecondary}
-      />
-
-      <StyledInput
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        placeholderTextColor={theme.colors.textSecondary}
-      />
-
-      <StyledButton
-        onPress={signIn}
-        disabled={loading}
+    <Container>
+      <LinearGradient
+        colors={[theme.colors.primary, theme.colors.accent]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
       >
-        <StyledText theme={theme} isHeading={false}>
-          {loading ? 'Signing in...' : 'Sign In'}
-        </StyledText>
-      </StyledButton>
+        <HeaderArea>
+          <BrandText>Gjej Makine</BrandText>
+          <BrandSub>Find your perfect car in Albania</BrandSub>
+        </HeaderArea>
+      </LinearGradient>
 
-      <StyledLink href="/sign-up">
-        Don't have an account? Sign Up
-      </StyledLink>
-      {/* go back to home screen */}
-      <StyledLink href="/(public)" style={{ marginTop: 10 }}>
-        {"⏮️ Go Back"}
-      </StyledLink>
+      <FormArea>
+        <Heading>Sign In</Heading>
 
-      <DemoButton onPress={() => { enterDemoMode(); router.replace('/(protected)/(tabs)'); }}>
-        <DemoButtonText>Try Demo Mode</DemoButtonText>
-      </DemoButton>
-    </StyledContainer >
+        {error && <ErrorText>{error}</ErrorText>}
+
+        <Input
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          placeholderTextColor={theme.colors.textSecondary}
+        />
+        <Input
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          placeholderTextColor={theme.colors.textSecondary}
+        />
+
+        <PrimaryBtn onPress={signIn} disabled={loading}>
+          <BtnText>{loading ? 'Signing in...' : 'Sign In'}</BtnText>
+        </PrimaryBtn>
+
+        <Link href="/sign-up" asChild>
+          <LinkText>Don't have an account? Sign Up</LinkText>
+        </Link>
+
+        <DemoBtn onPress={() => { enterDemoMode(); router.replace('/(protected)/(tabs)'); }}>
+          <DemoBtnText>Try Demo Mode</DemoBtnText>
+        </DemoBtn>
+      </FormArea>
+    </Container>
   );
 }
