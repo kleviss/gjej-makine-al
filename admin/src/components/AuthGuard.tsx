@@ -14,7 +14,7 @@ export default function AuthGuard({ children, allowedRoles }: Props) {
   useEffect(() => {
     if (searchParams.get("demo") === "1") {
       localStorage.setItem("admin_demo", "1");
-      window.location.reload();
+      window.location.replace("/");
       return;
     }
   }, [searchParams]);
